@@ -14,24 +14,30 @@ try {
 /**
  * StreamManager
  * Gerencia pipelines de transcodificação RTSP -> MJPEG em tempo real
- * com suporte a múltiplos clientes conectados simultâneos por câmera.
+ * com suporte a múltiplos clientes conectados simultâneos por câmera
+ * e modos de qualidade selecionáveis (HD 1080p e SD ultraleve).
  */
 class StreamManager extends EventEmitter {
   constructor(cameraManager) {
     super();
     this.cameraManager = cameraManager;
-    // Map de cameraId -> { proc, clients: Set<res>, lastFrame: Buffer, stopTimer: Timer }
+    // Map de streamKey (`${cameraId}:${quality}`) -> { proc, clients: Set<res>, lastFrame: Buffer, stopTimer: Timer }
     this.streams = new Map();
   }
 
   /**
    * Conecta um cliente HTTP ao stream MJPEG ao vivo da câmera
+   * @param {string} cameraId
+   * @param {'hd'|'sd'} quality
    */
-  pipeMjpeg(cameraId, req, res) {
+  pipeMjpeg(cameraId, quality = 'hd', req, res) {
+    const q = (quality || 'hd').toLowerCase() === 'sd' ? 'sd' : 'hd';
     const camera = this.cameraManager.get(cameraId);
     if (!camera) {
       return res.status(404).json({ error: 'Câmera não encontrada' });
     }
+
+    const streamKey = `${cameraId}:${q}`;
 
     // Configura headers para MJPEG multipart
     res.writeHead(200, {
@@ -42,9 +48,9 @@ class StreamManager extends EventEmitter {
       'Expires': '0'
     });
 
-    let stream = this.streams.get(cameraId);
+    let stream = this.streams.get(streamKey);
 
-    // Se já temos um frame recente em cache, envia imediatamente para o cliente ver na hora
+    // Se já temos um frame recente em cache desse stream, envia imediatamente
     if (stream && stream.lastFrame) {
       try {
         res.write(`--frame\r\nContent-Type: image/jpeg\r\nContent-Length: ${stream.lastFrame.length}\r\n\r\n`);
@@ -55,8 +61,8 @@ class StreamManager extends EventEmitter {
 
     // Inicia stream se não estiver ativo
     if (!stream) {
-      stream = this._startCameraStream(camera);
-      this.streams.set(cameraId, stream);
+      stream = this._startCameraStream(camera, q, streamKey);
+      this.streams.set(streamKey, stream);
     } else if (stream.stopTimer) {
       // Cancela encerramento agendado se novo cliente chegou
       clearTimeout(stream.stopTimer);
@@ -70,11 +76,11 @@ class StreamManager extends EventEmitter {
     const cleanup = () => {
       if (stream && stream.clients) {
         stream.clients.delete(res);
-        // Se não houver mais clientes, agenda o encerramento do stream após 5 segundos
+        // Se não houver mais clientes, agenda o encerramento após 5 segundos
         if (stream.clients.size === 0) {
           if (!stream.stopTimer) {
             stream.stopTimer = setTimeout(() => {
-              this._stopCameraStream(cameraId);
+              this._stopCameraStream(streamKey);
             }, 5000);
           }
         }
@@ -89,8 +95,11 @@ class StreamManager extends EventEmitter {
   /**
    * Obtém o frame mais recente em cache ou realiza captura rápida de 1 frame
    */
-  async getSnapshot(cameraId) {
-    const stream = this.streams.get(cameraId);
+  async getSnapshot(cameraId, quality = 'hd') {
+    const q = (quality || 'hd').toLowerCase() === 'sd' ? 'sd' : 'hd';
+    const streamKey = `${cameraId}:${q}`;
+    const stream = this.streams.get(streamKey);
+
     if (stream && stream.lastFrame && (Date.now() - stream.lastFrameTime) < 3000) {
       return stream.lastFrame;
     }
@@ -105,30 +114,35 @@ class StreamManager extends EventEmitter {
     if (protocol && protocol.getSnapshot) {
       try {
         const snap = await protocol.getSnapshot(camera);
-        // Se não for SVG (é uma imagem real), retorna
         const isSvg = snap && snap.toString('utf-8', 0, 50).includes('<svg');
         if (!isSvg) return snap;
       } catch (e) {}
     }
 
     // Captura um frame pontual via FFmpeg da URL RTSP
-    return this._captureSingleFrame(camera);
+    return this._captureSingleFrame(camera, q);
   }
 
   /**
    * Inicia processo FFmpeg para captura contínua de frames RTSP -> MJPEG
    */
-  _startCameraStream(camera) {
+  _startCameraStream(camera, quality, streamKey) {
     const protocol = this.cameraManager.getProtocol(camera.type);
-    // Usa live/av1 (sub-stream mais rápido e leve para preview) ou a URL padrão
     let rtspUrl = protocol ? protocol.getRtspUrl(camera) : `rtsp://${camera.ip}:554/live/av0`;
-    
-    // Tenta sub-stream se for Datavideo para ter latência ultrabaixa
-    if (camera.type === 'datavideo' && rtspUrl.includes('/live/av0')) {
-      rtspUrl = rtspUrl.replace('/live/av0', '/live/av1');
+
+    // Datavideo: live/av0 é Main Stream (Full HD 1080p), live/av1 é Sub Stream (SD)
+    if (camera.type === 'datavideo') {
+      if (quality === 'sd') {
+        rtspUrl = rtspUrl.replace('/live/av0', '/live/av1');
+      } else {
+        rtspUrl = rtspUrl.replace('/live/av1', '/live/av0');
+      }
     }
 
-    console.log(`[StreamManager] Iniciando stream ao vivo para câmera ${camera.id} (${camera.ip})...`);
+    const fps = quality === 'hd' ? '20' : '15';
+    const qscale = quality === 'hd' ? '3' : '4';
+
+    console.log(`[StreamManager] Iniciando stream ${quality.toUpperCase()} para câmera ${camera.id} (${camera.ip})...`);
 
     const args = [
       '-rtsp_transport', 'tcp',
@@ -136,8 +150,8 @@ class StreamManager extends EventEmitter {
       '-i', rtspUrl,
       '-an',
       '-c:v', 'mjpeg',
-      '-q:v', '4',
-      '-r', '15',
+      '-q:v', qscale,
+      '-r', fps,
       '-f', 'image2pipe',
       '-'
     ];
@@ -145,6 +159,7 @@ class StreamManager extends EventEmitter {
     const proc = spawn(ffmpegPath, args, { stdio: ['ignore', 'pipe', 'ignore'] });
     const streamData = {
       proc,
+      quality,
       clients: new Set(),
       lastFrame: null,
       lastFrameTime: 0,
@@ -192,14 +207,14 @@ class StreamManager extends EventEmitter {
     });
 
     proc.on('close', (code) => {
-      console.log(`[StreamManager] Stream da câmera ${camera.id} encerrado (código: ${code})`);
-      if (this.streams.get(camera.id) === streamData) {
-        this.streams.delete(camera.id);
+      console.log(`[StreamManager] Stream ${streamKey} encerrado (código: ${code})`);
+      if (this.streams.get(streamKey) === streamData) {
+        this.streams.delete(streamKey);
       }
     });
 
     proc.on('error', (err) => {
-      console.error(`[StreamManager] Erro no processo FFmpeg da câmera ${camera.id}:`, err.message);
+      console.error(`[StreamManager] Erro no FFmpeg (${streamKey}):`, err.message);
     });
 
     return streamData;
@@ -208,27 +223,35 @@ class StreamManager extends EventEmitter {
   /**
    * Encerra processo de stream de uma câmera
    */
-  _stopCameraStream(cameraId) {
-    const stream = this.streams.get(cameraId);
+  _stopCameraStream(streamKey) {
+    const stream = this.streams.get(streamKey);
     if (!stream) return;
 
-    console.log(`[StreamManager] Encerrando stream ocioso da câmera ${cameraId}...`);
+    console.log(`[StreamManager] Encerrando stream ocioso (${streamKey})...`);
     try {
       if (stream.proc && !stream.proc.killed) {
         stream.proc.kill('SIGTERM');
       }
     } catch (e) {}
 
-    this.streams.delete(cameraId);
+    this.streams.delete(streamKey);
   }
 
   /**
    * Captura 1 frame rápido de uma câmera via RTSP
    */
-  _captureSingleFrame(camera) {
+  _captureSingleFrame(camera, quality = 'hd') {
     return new Promise((resolve) => {
       const protocol = this.cameraManager.getProtocol(camera.type);
-      const rtspUrl = protocol ? protocol.getRtspUrl(camera) : `rtsp://${camera.ip}:554/live/av0`;
+      let rtspUrl = protocol ? protocol.getRtspUrl(camera) : `rtsp://${camera.ip}:554/live/av0`;
+
+      if (camera.type === 'datavideo') {
+        if (quality === 'sd') {
+          rtspUrl = rtspUrl.replace('/live/av0', '/live/av1');
+        } else {
+          rtspUrl = rtspUrl.replace('/live/av1', '/live/av0');
+        }
+      }
 
       const args = [
         '-rtsp_transport', 'tcp',
@@ -249,7 +272,6 @@ class StreamManager extends EventEmitter {
         if (code === 0 && chunks.length > 0) {
           resolve(Buffer.concat(chunks));
         } else {
-          // Fallback final: SVG banner
           const fallbackProtocol = this.cameraManager.getProtocol('datavideo');
           resolve(fallbackProtocol ? fallbackProtocol._generatePreviewSvg(camera) : Buffer.from(''));
         }

@@ -1,201 +1,199 @@
-#  PrismCam
+# PrismCam
 
 <p align="center">
-  <img src="public/assets/icon.svg" alt="PrismCam Logo" width="140" height="140" />
+  <img src="public/assets/icon.svg" alt="PrismCam Logo" width="130" height="130" />
 </p>
 
 <p align="center">
-  <strong>Software moderno de controle PTZ, varredura de rede e captura de câmeras IP para produção de vídeo e OBS Studio.</strong>
+  <strong>Controle PTZ, varredura de rede e captura de câmeras IP para produção de vídeo e OBS Studio.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Node.js-v18%2B-green.svg" alt="Node.js" />
-  <img src="https://img.shields.io/badge/OBS%20Studio-Compatible-purple.svg" alt="OBS Studio" />
-  <img src="https://img.shields.io/badge/Câmeras-Datavideo%20%7C%20ONVIF-blue.svg" alt="Datavideo & ONVIF" />
-  <img src="https://img.shields.io/badge/License-MIT-orange.svg" alt="Licença MIT" />
+  <img src="https://img.shields.io/badge/Node.js-v18%2B-2ea44f.svg" alt="Node.js" />
+  <img src="https://img.shields.io/badge/OBS%20Studio-Compatível-8250df.svg" alt="OBS Studio" />
+  <img src="https://img.shields.io/badge/Protocolos-Datavideo%20%7C%20VISCA%20%7C%20ONVIF-0969da.svg" alt="Datavideo, VISCA e ONVIF" />
+  <img src="https://img.shields.io/badge/License-CC%20BY--NC%204.0-d97706.svg" alt="Licença CC BY-NC 4.0" />
 </p>
 
 ---
 
-## 💡 Sobre o Projeto
+## Sobre o Projeto
 
-O **PrismCam** foi desenvolvido para simplificar a vida de operadores de streaming e transmissão ao vivo. Ele atua como um hub centralizado:
-1. **Identifica câmeras Datavideo** (e outras câmeras IP compatíveis) através de varredura automática na rede local ou configuração manual de IP.
-2. **Executa um servidor interno em background** que converte e disponibiliza streams de vídeo (MJPEG, RTSP e Snapshots).
-3. **Oferece controle PTZ em tempo real** (Pan, Tilt, Zoom, Foco e Presets) tanto através de uma interface web premium quanto via API REST programável (ideal para automações e atalhos no OBS Studio ou Elgato Stream Deck).
+O **PrismCam** é uma aplicação para operadores de transmissão e produção ao vivo com câmeras PTZ conectadas em rede (com foco em Datavideo e expansível para ONVIF e outros protocolos).
 
----
-
-## ✨ Funcionalidades Principais
-
-- 🔍 **Varredura Automática de Rede:** Encontra câmeras conectadas na sua sub-rede sem precisar descobrir o IP manualmente.
-- ➕ **Adição Manual de Câmeras:** Configure IPs estáticos, portas, usuário e senha em poucos segundos.
-- 🔴 **Vídeo Ao Vivo no Navegador:** Streaming em tempo real integrado (RTSP para MJPEG com ultrabaixa latência e badge *AO VIVO*), permitindo monitorar e controlar o enquadramento sem atraso.
-- 🕹️ **Controle PTZ Completo:**
-  - Pan & Tilt em 8 direções com velocidades ajustáveis.
-  - Zoom In/Out e Foco Manual (+ / -) e Automático (Auto).
-  - Posição Home e chamada rápida de **Presets de 1 a 9**.
-- ⌨️ **Atalhos de Teclado:** Controle PTZ ágil com `WASD` ou `Setas direcionais`, zoom com `+`/`-` ou `Q`/`E`, e números `1` a `9` para presets.
-- 📺 **Integração com OBS Studio:**
-  - Endpoint **MJPEG Stream** direto para fontes de Navegador (*Browser Source*).
-  - URLs **RTSP** prontas para Fontes de Mídia ou Fontes de Vídeo VLC (`/live/av0` e `/live/av1`).
-  - **Snapshots HTTP** atualizados continuamente.
-- 🔌 **Extensibilidade de Protocolos:** Desenvolvido com padrão modular para suportar câmeras Datavideo (baseado no protocolo CGI/PTZ da Datavideo) e expansível para ONVIF, Sony VISCA over IP, PTZOptics e Panasonic.
-- 🚀 **Execução com 1 Clique:** Acompanha o script `start.bat` para que o operador inicie o programa facilmente como um aplicativo.
+Principais objetivos:
+1. **Identificar câmeras:** Varredura automática na sub-rede local ou cadastro manual por IP.
+2. **Streaming em tempo real no navegador:** Monitoramento com latência ultrabaixa com chaveamento entre resolução **HD (1080p Main Stream)** e **SD (Sub Stream)**.
+3. **Controle PTZ completo:** Movimentação Pan/Tilt em 8 direções, velocidades independentes, Zoom, Foco manual/automático, Home e Presets de 1 a 9.
+4. **Integração direta com OBS Studio:** Fontes de vídeo prontas para tela cheia (sem bordas pretas), RTSP e integração com o plugin de docas PTZ do OBS.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Funcionalidades
 
-- **Backend:** Node.js, Express, CORS, HTTP Proxy nativo.
-- **Frontend:** HTML5 semântico, Vanilla CSS com Design System moderno (Dark theme, glassmorphism, gradientes prismáticos, layout responsivo) e JavaScript modular.
-- **Protocolos de Câmera:** Datavideo HTTP/CGI API, ONVIF Profile S básico, RTSP e MJPEG multipart streaming.
+- **Varredura de Rede:** Descobre câmeras IP conectadas à rede local automaticamente.
+- **Cadastro Manual:** Adiciona câmeras com IP estático, porta e credenciais personalizadas.
+- **Vídeo ao Vivo (Navegador):** Conversão contínua RTSP para MJPEG com baixa latência, permitindo guiar movimentos em tempo real.
+- **Seletor de Qualidade HD / SD:**
+  - **HD:** Stream principal 1080p (`/live/av0`), com nitidez máxima para enquadramento e transmissão.
+  - **SD:** Sub-stream otimizado (`/live/av1`), ultraleve para redes com menor largura de banda.
+- **Controle PTZ:**
+  - Movimentos Pan e Tilt em 8 direções com sliders de velocidade.
+  - Zoom In/Out e Foco (+ / - manual e modo Auto).
+  - Posição Home e chamada de Presets de 1 a 9.
+  - Gravação de novos presets (1 a 255) diretamente pela interface.
+- **Atalhos de Teclado:**
+  - `WASD` ou `Setas direcionais`: Pan e Tilt contínuos.
+  - `Q` / `E` ou `+` / `-`: Zoom.
+  - `H` ou tecla `Home`: Retorno à posição Home.
+  - Números `1` a `9` (linha superior ou teclado numérico Numpad): Chamada imediata do preset.
+  - `Esc`: Libera o foco de campos de texto para reativar atalhos imediatamente.
+- **Inicializador para Windows:** Arquivo `start.bat` para iniciar o programa com duplo clique sem precisar abrir o terminal.
 
 ---
 
-## 🚀 Como Instalar e Rodar
+## Tecnologias
+
+- **Backend:** Node.js, Express, FFmpeg (via `@ffmpeg-installer/ffmpeg`), HTTP Proxy.
+- **Frontend:** HTML5, CSS moderno (Dark Theme com design glassmorphic) e Vanilla JavaScript modular.
+- **Protocolos:** Datavideo CGI/AJAX, VISCA over TCP, RTSP e MJPEG multipart streaming.
+
+---
+
+## Instalação e Execução
 
 ### Pré-requisitos
 - [Node.js](https://nodejs.org/) versão 18 ou superior instalado.
 
 ### Modo Rápido (Windows)
-Basta dar um duplo clique no arquivo:
+Execute com duplo clique no arquivo:
 ```cmd
 start.bat
 ```
-O script cuidará de instalar as dependências na primeira execução e abrirá o painel no seu navegador padrão.
-
----
+O inicializador verifica e instala dependências automaticamente na primeira execução e abre o navegador em `http://localhost:4000`.
 
 ### Modo Manual (Terminal)
-
-1. Clone o repositório:
 ```bash
 git clone https://github.com/AnthonyPerotti/PrismCam.git
 cd PrismCam
-```
-
-2. Instale as dependências:
-```bash
 npm install
-```
-
-3. Inicie o servidor:
-```bash
 npm start
 ```
 
-4. Acesse o painel pelo navegador:
+Acesse no navegador:
 ```
 http://localhost:4000
 ```
 
 ---
 
-## 🎬 Como Integrar com o OBS Studio
+## Integração com o OBS Studio
 
-### Método 1: Stream MJPEG (Recomendado para baixa latência em rede local)
-1. No OBS Studio, adicione uma nova fonte do tipo **Navegador (Browser)**.
-2. Copie a URL do MJPEG gerada no painel do PrismCam na aba **Integração OBS**:
-   ```
-   http://localhost:4000/api/cameras/{id-da-camera}/mjpeg
-   ```
-3. Defina a largura e altura desejadas (ex: `1920x1080` ou `1280x720`).
-4. Marque a opção de recarregar a fonte quando se tornar ativa.
+### 1. Captura de Vídeo (Fonte de Navegador — Sem Bordas Pretas)
 
-### Método 2: Fonte de Mídia / VLC (Stream RTSP)
-1. No OBS Studio, adicione uma fonte **Fonte de Vídeo VLC** ou **Fonte de Mídia**.
-2. Desmarque a opção *"Arquivo local"*.
-3. Cole a URL RTSP gerada no painel do PrismCam:
-   - Para Datavideo: `rtsp://<USUARIO>:<SENHA>@<IP-DA-CAMERA>:554/live/av0` (Main Stream) ou `/live/av1` (Sub Stream)
-   - Para ONVIF/Genérica: `rtsp://<USUARIO>:<SENHA>@<IP-DA-CAMERA>:554/stream1`
-4. Defina o buffer de rede para 100ms a 300ms para latência mínima.
+Para evitar que o vídeo apareça com margens pretas no OBS:
+
+1. No OBS Studio, adicione uma nova fonte do tipo **Navegador (Browser Source)**.
+2. No campo **URL**, cole o link dedicado do PrismCam:
+   ```
+   http://localhost:4000/obs/camera/<id-da-camera>
+   ```
+3. Defina a **Largura** e **Altura** desejadas no OBS (ex: `1920` e `1080`).
+4. Este endpoint ajusta o stream em tela cheia automaticamente sem cortes ou margens pretas.
+
+> **Dica para URL MJPEG direta:** Se você usar a URL direta `http://localhost:4000/api/cameras/<id>/mjpeg?quality=hd`, configure a resolução no OBS para `1920x1080` e, no campo **CSS personalizado** do OBS, adicione:
+> ```css
+> body { margin: 0; background-color: rgba(0, 0, 0, 0); overflow: hidden; }
+> img { width: 100%; height: 100%; object-fit: cover; }
+> ```
+
+### 2. Captura de Vídeo via RTSP (Fonte de Vídeo VLC)
+
+1. Adicione uma fonte **Fonte de Vídeo VLC** ou **Fonte de Mídia**.
+2. Desmarque a opção *Arquivo local*.
+3. Insira o endereço RTSP fornecido na aba **Integração OBS**:
+   - Datavideo HD (Main): `rtsp://<usuario>:<senha>@<ip>:554/live/av0`
+   - Datavideo SD (Sub): `rtsp://<usuario>:<senha>@<ip>:554/live/av1`
+4. Ajuste o buffer de rede para 150ms a 300ms para menor latência.
 
 ---
 
-## 📡 Referência da API REST (Automações & Stream Deck)
+### 3. Controle PTZ pelas Docas do OBS (Plugin OBS-PTZ)
 
-O PrismCam expõe uma API REST local que você pode acionar através de scripts no OBS, macros do Stream Deck ou comandos cURL:
+Para controlar o Pan, Tilt, Zoom e Presets diretamente pelas docas do OBS Studio sem precisar sair do programa:
 
-| Método | Rota | Descrição | Parâmetros (JSON) |
+1. Instale o plugin oficial **OBS-PTZ**:
+   - Repositório: [https://github.com/glikely/obs-ptz](https://github.com/glikely/obs-ptz)
+   - Baixe a versão para seu sistema na seção de Releases do plugin e instale.
+2. No OBS Studio, abra o menu **Docks > PTZ** (ou **Ferramentas > PTZ**).
+3. Adicione uma nova câmera e configure com os seguintes dados:
+   - **Type / Protocol:** `VISCA over TCP` (ou VISCA/TCP)
+   - **Camera IP / Host:** O IP da sua câmera (ex: `172.16.1.170`)
+   - **VISCA Port:** `1259` *(porta padrão para câmeras Datavideo)*
+   - **Camera Address:** `1`
+4. Salve a configuração. Agora os controles físicos do OBS moverão sua câmera Datavideo diretamente.
+
+---
+
+## Referência da API REST
+
+O PrismCam possui uma API local para integração com scripts, Stream Deck ou automações cURL:
+
+| Método | Rota | Descrição | Parâmetros |
 |---|---|---|---|
-| `GET` | `/api/cameras` | Lista todas as câmeras configuradas | - |
-| `POST` | `/api/cameras` | Adiciona uma nova câmera | `{ "ip": "192.168.1.100", "name": "Palco", "type": "datavideo" }` |
-| `DELETE` | `/api/cameras/:id` | Remove uma câmera | - |
-| `POST` | `/api/cameras/:id/test` | Testa a conexão com a câmera | - |
+| `GET` | `/api/cameras` | Lista as câmeras cadastradas | - |
+| `POST` | `/api/cameras` | Cadastra câmera | `{ "ip": "172.16.1.170", "name": "Datavideo", "type": "datavideo" }` |
+| `DELETE` | `/api/cameras/:id` | Remove câmera | - |
+| `POST` | `/api/cameras/:id/test` | Testa conexão e autenticação | - |
 | `POST` | `/api/ptz/:id/move` | Move a câmera | `{ "direction": "up", "panSpeed": 12, "tiltSpeed": 10 }` |
 | `POST` | `/api/ptz/:id/stop` | Para o movimento | - |
-| `POST` | `/api/ptz/:id/zoom` | Controla o zoom | `{ "action": "zoomin", "speed": 4 }` |
-| `POST` | `/api/ptz/:id/focus` | Controla o foco | `{ "action": "focusnear" }` |
-| `POST` | `/api/ptz/:id/home` | Retorna à posição central (Home) | - |
-| `POST` | `/api/ptz/:id/preset/goto` | Move para um preset | `{ "preset": 1 }` |
-| `POST` | `/api/ptz/:id/preset/set` | Salva a posição no preset | `{ "preset": 1 }` |
-| `GET` | `/api/cameras/:id/snapshot` | Retorna imagem JPEG instantânea | - |
-| `GET` | `/api/cameras/:id/mjpeg` | Stream multipart MJPEG contínuo em tempo real | - |
-| `GET` | `/api/cameras/:id/live` | Alias para stream MJPEG ao vivo | - |
-| `POST` | `/api/scan` | Dispara varredura na rede | `{ "subnet": "192.168.1", "startIp": 1, "endIp": 254 }` |
-
-### Exemplo com cURL:
-```bash
-# Mover para cima:
-curl -X POST http://localhost:4000/api/ptz/cam-1/move -H "Content-Type: application/json" -d "{\"direction\":\"up\"}"
-
-# Parar movimento:
-curl -X POST http://localhost:4000/api/ptz/cam-1/stop
-
-# Ir para o Preset 2:
-curl -X POST http://localhost:4000/api/ptz/cam-1/preset/goto -H "Content-Type: application/json" -d "{\"preset\":2}"
-```
+| `POST` | `/api/ptz/:id/zoom` | Controle de Zoom | `{ "action": "zoomin" \| "zoomout" \| "stop", "speed": 4 }` |
+| `POST` | `/api/ptz/:id/focus` | Controle de Foco | `{ "action": "autofocus" \| "focusnear" \| "focusfar" \| "stop" }` |
+| `POST` | `/api/ptz/:id/home` | Retorna ao centro (Home) | - |
+| `POST` | `/api/ptz/:id/preset/goto` | Move para Preset | `{ "preset": 1 }` |
+| `POST` | `/api/ptz/:id/preset/set` | Grava posição no Preset | `{ "preset": 1 }` |
+| `GET` | `/api/cameras/:id/mjpeg` | Stream MJPEG contínuo | Query: `?quality=hd` ou `?quality=sd` |
+| `GET` | `/obs/camera/:id` | Página full screen para OBS | Query: `?quality=hd&fit=contain` |
+| `GET` | `/api/cameras/:id/snapshot` | Snapshot estático JPEG | Query: `?quality=hd` |
+| `POST` | `/api/scan` | Dispara varredura na rede | `{ "subnet": "172.16.1", "startIp": 1, "endIp": 254 }` |
 
 ---
 
-## 📂 Estrutura de Arquivos
+## Estrutura de Arquivos
 
 ```
 PrismCam/
-├── .gitignore               # Regras do Git (ignora node_modules, config local e testes)
-├── README.md                # Documentação oficial
-├── LICENSE                  # Licença MIT
-├── package.json             # Dependências e scripts do projeto
-├── start.bat                # Inicializador de duplo clique para Windows
-├── public/                  # Interface Web (Frontend)
-│   ├── index.html           # Layout do painel de controle
+├── .gitignore               # Regras do Git (ignora dados locais, credenciais e testes)
+├── README.md                # Documentação técnica do projeto
+├── LICENSE                  # Licença de uso não-comercial
+├── package.json             # Dependências e metadados
+├── start.bat                # Inicializador rápido para Windows
+├── public/                  # Interface Web
+│   ├── index.html           # Estrutura do painel de controle e abas
 │   ├── assets/
-│   │   └── icon.svg         # Ícone vetorial do PrismCam
+│   │   └── icon.svg         # Ícone vetorial do projeto
 │   ├── css/
-│   │   └── style.css        # Design System dark/glassmorphic com badge AO VIVO
+│   │   └── style.css        # Estilos, tema dark e componentes visuais
 │   └── js/
-│       └── app.js           # Lógica do painel, PTZ, stream ao vivo e varredura
-└── src/                     # Backend e Serviços
-    ├── server.js            # Servidor Express, rotas da API e endpoints de vídeo
-    ├── stream-manager.js    # Pipeline de streaming MJPEG/RTSP em tempo real
-    ├── camera-manager.js    # Gerenciador de câmeras e persistência
-    ├── network-scanner.js   # Varredura de IPs e sondagem de portas
-    └── protocols/           # Drivers de protocolo
-        ├── datavideo.js     # Driver para câmeras Datavideo (CGI/PTZ)
-        └── generic-onvif.js # Driver para câmeras ONVIF genéricas
+│       └── app.js           # Lógica do painel, atalhos, PTZ e OBS
+└── src/                     # Servidor e Lógica de Negócio
+    ├── server.js            # Servidor Express, rotas da API e endpoints OBS
+    ├── stream-manager.js    # Multiplexação e streaming RTSP para MJPEG (HD/SD)
+    ├── camera-manager.js    # Gerenciamento de câmeras e persistência local
+    ├── network-scanner.js   # Varredura de IPs e detecção de portas
+    └── protocols/           # Drivers de câmeras
+        ├── datavideo.js     # Driver para linha Datavideo (CGI/AJAX/PTZ)
+        └── generic-onvif.js # Driver base para câmeras ONVIF
 ```
 
 ---
 
-## 🧩 Adicionando Novos Protocolos de Câmera
+## Licença
 
-Para adicionar suporte a novos modelos no futuro (Sony, PTZOptics, Panasonic, etc.):
-1. Crie um arquivo em `src/protocols/<nome-do-protocolo>.js` implementando os métodos:
-   - `testConnection(camera)`
-   - `ptzMove(camera, direction, panSpeed, tiltSpeed)`
-   - `ptzStop(camera)`
-   - `ptzZoom(camera, action, speed)`
-   - `ptzFocus(camera, action, speed)`
-   - `ptzHome(camera)`
-   - `ptzGotoPreset(camera, preset)`
-   - `ptzSetPreset(camera, preset)`
-   - `getSnapshot(camera)`
-   - `getRtspUrl(camera)`
-2. Registre a classe no `src/camera-manager.js` dentro do objeto `this.protocols`.
+Distribuído sob a licença **Atribuição Não-Comercial (CC BY-NC 4.0 Adapted)**.
 
----
+- **Permitido:** Você pode usar, copiar, modificar, distribuir e contribuir com o projeto livremente.
+- **Créditos:** Deve manter os créditos e atribuição ao autor original (**Anthony Perotti**).
+- **Não Comercial:** É proibido o uso, venda ou redistribuição deste software para fins comerciais sem autorização prévia por escrito.
 
-## 📄 Licença
-
-Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` ou consulte [MIT License](https://opensource.org/licenses/MIT) para mais detalhes.
+Consulte o arquivo [LICENSE](LICENSE) para o texto completo da licença.

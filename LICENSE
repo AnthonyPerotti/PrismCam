@@ -1,21 +1,21 @@
-MIT License
+Licença de Atribuição Não-Comercial (CC BY-NC 4.0 Adapted)
 
 Copyright (c) 2026 Anthony Perotti
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Por meio deste documento, concede-se a qualquer pessoa permissão gratuita para:
+1. Compartilhar — copiar, distribuir e transmitir este software e seu código-fonte em qualquer meio ou formato.
+2. Adaptar e Contribuir — remixar, transformar, modificar e criar trabalhos derivados com base nesta obra para aprimoramento e colaboração comunitária.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Sob as seguintes condições obrigatórias:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+- ATRIBUIÇÃO (CRÉDITOS):
+  Você deve atribuir o devido crédito ao autor original (Anthony Perotti), fornecer um link para a licença e indicar se foram feitas alterações. Você pode fazê-lo de qualquer maneira razoável, mas não de modo que sugira que o autor endossa você ou seu uso.
+
+- USO NÃO COMERCIAL:
+  Você NÃO pode utilizar este material, em sua totalidade ou em parte, para fins comerciais, vendas, revenda, licenciamento pago ou qualquer forma de monetização direta ou indireta sem a autorização prévia e expressa por escrito do titular dos direitos autorais.
+
+- CONTRIBUIÇÕES:
+  Contribuições ao projeto via pull requests, relatórios de problemas ou sugestões são bem-vindas e incentivadas, ficando sujeitas aos mesmos termos desta licença.
+
+ISENÇÃO DE RESPONSABILIDADE:
+ESTE SOFTWARE É FORNECIDO "COMO ESTÁ", SEM QUALQUER TIPO DE GARANTIA, EXPRESSA OU IMPLÍCITA, INCLUINDO, MAS NÃO SE LIMITANDO A, GARANTIAS DE COMERCIALIZAÇÃO, ADEQUAÇÃO A UMA FINALIDADE ESPECÍFICA E NÃO VIOLAÇÃO. EM NENHUMA HIPÓTESE O AUTOR OU OS DETENTORES DE DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER RECLAMAÇÃO, DANO OU OUTRA RESPONSABILIDADE, SEJA EM UMA AÇÃO DE CONTRATO, ILÍCITO OU DE OUTRA FORMA, DECORRENTE DE OU EM CONEXÃO COM O SOFTWARE OU O USO OU OUTRAS NEGOCIAÇÕES NO SOFTWARE.

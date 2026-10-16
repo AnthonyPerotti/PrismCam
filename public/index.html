@@ -132,7 +132,7 @@
             <video id="preview-video" class="preview-video hidden" autoplay muted playsinline></video>
             <img id="preview-image" class="preview-image hidden" alt="Preview da câmera"/>
             <div class="live-stream-badge hidden" id="preview-live-badge">
-              <span class="live-dot"></span> AO VIVO
+              <span class="live-dot"></span> AO VIVO <span class="badge-quality" id="live-quality-tag">HD</span>
             </div>
           </div>
           <div class="preview-controls">
@@ -147,6 +147,10 @@
               </svg>
               <span>Live</span>
             </button>
+            <div class="quality-selector" title="Qualidade do stream no navegador">
+              <button class="btn-quality active" id="btn-quality-hd" onclick="setPreviewQuality('hd')" title="Alta Resolução (1080p Main Stream)">HD</button>
+              <button class="btn-quality" id="btn-quality-sd" onclick="setPreviewQuality('sd')" title="Resolução Reduzida (Sub Stream)">SD</button>
+            </div>
           </div>
         </div>
 
@@ -310,29 +314,61 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
             </svg>
-            <h3>Captura de Vídeo</h3>
+            <h3>Captura de Vídeo no OBS</h3>
           </div>
           <div class="info-card-body">
-            <p>Use uma das opções abaixo para capturar o vídeo da câmera no OBS:</p>
+            <p>Escolha a opção ideal para a sua cena no OBS Studio:</p>
+
+            <div class="url-block">
+              <span class="url-label">Fonte de Navegador (Tela Cheia Automática — Sem Bordas Pretas)</span>
+              <small class="muted" style="display:block; margin-bottom:6px;">Recomendado: Ajusta 100% da resolução configurada no OBS automaticamente em HD.</small>
+              <div class="url-copy" id="obs-browser-urls">
+                <p class="muted">Adicione câmeras para ver as URLs aqui</p>
+              </div>
+            </div>
             
             <div class="url-block">
-              <span class="url-label">MJPEG Stream (Browser Source)</span>
+              <span class="url-label">Stream MJPEG Direto (Browser Source)</span>
+              <small class="muted" style="display:block; margin-bottom:6px;">No OBS, defina Largura: 1920 e Altura: 1080 (ou use CSS: <code>img { width: 100%; height: 100%; object-fit: cover; }</code>).</small>
               <div class="url-copy" id="obs-mjpeg-urls">
                 <p class="muted">Adicione câmeras para ver as URLs aqui</p>
               </div>
             </div>
 
             <div class="url-block">
-              <span class="url-label">RTSP Stream (Media Source / VLC)</span>
+              <span class="url-label">RTSP Stream (Fonte de Vídeo VLC / Fonte de Mídia)</span>
               <div class="url-copy" id="obs-rtsp-urls">
                 <p class="muted">Adicione câmeras para ver as URLs aqui</p>
               </div>
             </div>
 
             <div class="url-block">
-              <span class="url-label">Snapshot (Imagem estática)</span>
+              <span class="url-label">Snapshot (Imagem estática JPEG)</span>
               <div class="url-copy" id="obs-snapshot-urls">
                 <p class="muted">Adicione câmeras para ver as URLs aqui</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+            </svg>
+            <h3>Plugin OBS-PTZ (Controle Nativo no OBS)</h3>
+          </div>
+          <div class="info-card-body">
+            <p>Para controlar o Pan, Tilt e Zoom diretamente pelas docas do OBS Studio, instale o plugin gratuito:</p>
+            <p style="margin: 8px 0;">
+              <a href="https://github.com/glikely/obs-ptz" target="_blank" rel="noreferrer" style="color:var(--accent-cyan); font-weight:600; text-decoration:underline;">
+                github.com/glikely/obs-ptz
+              </a>
+            </p>
+            <div class="url-block" style="margin-top:14px;">
+              <span class="url-label">Parâmetros de Conexão no Plugin OBS-PTZ:</span>
+              <div id="obs-visca-config">
+                <p class="muted">Adicione câmeras para ver as configurações aqui</p>
               </div>
             </div>
           </div>

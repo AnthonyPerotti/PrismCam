@@ -13,7 +13,8 @@ const state = {
   isLivePreviewActive: false,
   scanInterval: null,
   currentScanId: null,
-  activePanel: 'cameras'
+  activePanel: 'cameras',
+  previewQuality: localStorage.getItem('prismcam_quality') || 'hd'
 };
 
 // ============================================================
@@ -24,7 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setupKeyboardShortcuts();
   fetchCameras();
   detectNetworkSubnet();
+  initQualitySelector();
 });
+
+function initQualitySelector() {
+  const q = state.previewQuality || 'hd';
+  const btnHd = document.getElementById('btn-quality-hd');
+  const btnSd = document.getElementById('btn-quality-sd');
+  const tag = document.getElementById('live-quality-tag');
+  if (btnHd) btnHd.classList.toggle('active', q === 'hd');
+  if (btnSd) btnSd.classList.toggle('active', q === 'sd');
+  if (tag) tag.textContent = q.toUpperCase();
+}
 
 // ============================================================
 // NAVEGAÇÃO ENTRE PAINÉIS
@@ -592,6 +604,22 @@ async function ptzSetPreset() {
 // ============================================================
 // PREVIEW DE VÍDEO / STREAM AO VIVO (MJPEG) / SNAPSHOT
 // ============================================================
+function setPreviewQuality(quality) {
+  state.previewQuality = quality === 'sd' ? 'sd' : 'hd';
+  localStorage.setItem('prismcam_quality', state.previewQuality);
+
+  const btnHd = document.getElementById('btn-quality-hd');
+  const btnSd = document.getElementById('btn-quality-sd');
+  const tag = document.getElementById('live-quality-tag');
+
+  if (btnHd) btnHd.classList.toggle('active', state.previewQuality === 'hd');
+  if (btnSd) btnSd.classList.toggle('active', state.previewQuality === 'sd');
+  if (tag) tag.textContent = state.previewQuality.toUpperCase();
+
+  showToast(`Qualidade alterada para ${state.previewQuality.toUpperCase()}`, 'info');
+  refreshPreview();
+}
+
 function refreshPreview() {
   const id = state.selectedCameraId;
   const placeholder = document.getElementById('preview-placeholder');
@@ -599,6 +627,7 @@ function refreshPreview() {
   const video = document.getElementById('preview-video');
   const liveBadge = document.getElementById('preview-live-badge');
   const btnLive = document.getElementById('btn-live-preview');
+  const tag = document.getElementById('live-quality-tag');
 
   if (!id) return;
   const cam = state.cameras.find(c => c.id === id);
@@ -607,6 +636,9 @@ function refreshPreview() {
   stopCurrentWfs();
   if (video) video.classList.add('hidden');
 
+  const quality = state.previewQuality || 'hd';
+  if (tag) tag.textContent = quality.toUpperCase();
+
   if (img) {
     if (placeholder) placeholder.classList.add('hidden');
     img.classList.remove('hidden');
@@ -614,8 +646,8 @@ function refreshPreview() {
     // Desconecta stream anterior se houver
     img.src = '';
 
-    // Conecta ao stream MJPEG ao vivo em tempo real
-    img.src = `/api/cameras/${id}/mjpeg?t=${Date.now()}`;
+    // Conecta ao stream MJPEG ao vivo em tempo real com qualidade selecionada
+    img.src = `/api/cameras/${id}/mjpeg?quality=${quality}&t=${Date.now()}`;
 
     img.onload = () => {
       img.classList.remove('hidden');
@@ -628,7 +660,7 @@ function refreshPreview() {
       console.warn('Stream MJPEG indisponível, tentando snapshot...');
       if (liveBadge) liveBadge.classList.add('hidden');
       // Fallback para snapshot estático
-      img.src = `/api/cameras/${id}/snapshot?t=${Date.now()}`;
+      img.src = `/api/cameras/${id}/snapshot?quality=${quality}&t=${Date.now()}`;
       img.onerror = () => {
         img.classList.add('hidden');
         if (placeholder) {
@@ -818,24 +850,38 @@ function renderScanResults(found) {
 function updateObsPanel() {
   const origin = window.location.origin;
 
+  const browserContainer = document.getElementById('obs-browser-urls');
   const mjpegContainer = document.getElementById('obs-mjpeg-urls');
   const rtspContainer = document.getElementById('obs-rtsp-urls');
   const snapshotContainer = document.getElementById('obs-snapshot-urls');
+  const viscaContainer = document.getElementById('obs-visca-config');
 
   if (!mjpegContainer || !rtspContainer || !snapshotContainer) return;
 
   if (state.cameras.length === 0) {
     const emptyMsg = '<p class="muted">Adicione câmeras para gerar as URLs do OBS</p>';
+    if (browserContainer) browserContainer.innerHTML = emptyMsg;
     mjpegContainer.innerHTML = emptyMsg;
     rtspContainer.innerHTML = emptyMsg;
     snapshotContainer.innerHTML = emptyMsg;
+    if (viscaContainer) viscaContainer.innerHTML = emptyMsg;
     return;
+  }
+
+  if (browserContainer) {
+    browserContainer.innerHTML = state.cameras.map(cam => `
+      <div class="url-row">
+        <span class="cam-tag">${escapeHtml(cam.name)}:</span>
+        <input type="text" readonly value="${origin}/obs/camera/${cam.id}" class="input url-field" id="url-browser-${cam.id}">
+        <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('url-browser-${cam.id}')">Copiar</button>
+      </div>
+    `).join('');
   }
 
   mjpegContainer.innerHTML = state.cameras.map(cam => `
     <div class="url-row">
       <span class="cam-tag">${escapeHtml(cam.name)}:</span>
-      <input type="text" readonly value="${origin}/api/cameras/${cam.id}/mjpeg" class="input url-field" id="url-mjpeg-${cam.id}">
+      <input type="text" readonly value="${origin}/api/cameras/${cam.id}/mjpeg?quality=hd" class="input url-field" id="url-mjpeg-${cam.id}">
       <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('url-mjpeg-${cam.id}')">Copiar</button>
     </div>
   `).join('');
@@ -862,6 +908,21 @@ function updateObsPanel() {
       <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('url-snap-${cam.id}')">Copiar</button>
     </div>
   `).join('');
+
+  if (viscaContainer) {
+    viscaContainer.innerHTML = state.cameras.map(cam => `
+      <div style="background:var(--bg-tertiary); padding:10px 14px; border-radius:var(--radius-sm); margin-bottom:8px; border:var(--border-subtle);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong>${escapeHtml(cam.name)}</strong>
+          <span class="cam-type-badge datavideo">VISCA / TCP</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
+          <div><span class="muted">IP da Câmera:</span> <code style="color:var(--accent-cyan); font-weight:700;">${escapeHtml(cam.ip)}</code></div>
+          <div><span class="muted">Porta VISCA:</span> <code style="color:var(--accent-magenta); font-weight:700;">1259</code></div>
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 function copyToClipboard(elementId) {

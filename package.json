@@ -19,7 +19,7 @@
     "video-production"
   ],
   "author": "Anthony Perotti",
-  "license": "MIT",
+  "license": "CC-BY-NC-4.0",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "cors": "^2.8.5",

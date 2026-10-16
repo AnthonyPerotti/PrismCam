@@ -151,7 +151,8 @@ app.post('/api/ptz/:id/preset/goto', async (req, res) => {
 // Proxy de snapshot da câmera (para exibir no browser e usar no OBS)
 app.get('/api/cameras/:id/snapshot', async (req, res) => {
   try {
-    const imageBuffer = await streamManager.getSnapshot(req.params.id);
+    const quality = req.query.quality || 'hd';
+    const imageBuffer = await streamManager.getSnapshot(req.params.id, quality);
     const isSvg = imageBuffer.toString('utf-8', 0, 50).includes('<svg');
     res.set('Content-Type', isSvg ? 'image/svg+xml' : 'image/jpeg');
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -162,9 +163,11 @@ app.get('/api/cameras/:id/snapshot', async (req, res) => {
 });
 
 // MJPEG stream em tempo real de ultrabaixa latência (Browser e OBS)
+// Suporta ?quality=hd (padrão, 1080p) ou ?quality=sd (sub-stream)
 app.get('/api/cameras/:id/mjpeg', (req, res) => {
   try {
-    streamManager.pipeMjpeg(req.params.id, req, res);
+    const quality = req.query.quality || 'hd';
+    streamManager.pipeMjpeg(req.params.id, quality, req, res);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -173,13 +176,62 @@ app.get('/api/cameras/:id/mjpeg', (req, res) => {
 // Alias amigável para stream ao vivo
 app.get('/api/cameras/:id/live', (req, res) => {
   try {
-    streamManager.pipeMjpeg(req.params.id, req, res);
+    const quality = req.query.quality || 'hd';
+    streamManager.pipeMjpeg(req.params.id, quality, req, res);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Retorna informações de stream RTSP
+// Endpoint dedicado para Fonte de Navegador do OBS Studio (100% Tela Cheia, sem bordas pretas)
+app.get('/obs/camera/:id', (req, res) => {
+  const camera = cameraManager.get(req.params.id);
+  if (!camera) {
+    return res.status(404).send('Câmera não encontrada');
+  }
+
+  const quality = req.query.quality || 'hd';
+  const fit = req.query.fit || 'contain'; // 'contain' ou 'cover'
+
+  res.send(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PrismCam OBS — ${camera.name}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: ${fit};
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <img id="stream" src="/api/cameras/${req.params.id}/mjpeg?quality=${quality}" alt="Stream da Câmera" />
+  <script>
+    const img = document.getElementById('stream');
+    img.onerror = () => {
+      setTimeout(() => {
+        img.src = '/api/cameras/${req.params.id}/mjpeg?quality=${quality}&t=' + Date.now();
+      }, 2000);
+    };
+  </script>
+</body>
+</html>`);
+});
+
+// Retorna informações de stream RTSP e OBS
 app.get('/api/cameras/:id/stream-info', (req, res) => {
   const camera = cameraManager.get(req.params.id);
   if (!camera) {
@@ -188,7 +240,9 @@ app.get('/api/cameras/:id/stream-info', (req, res) => {
   const protocol = cameraManager.getProtocol(camera.type);
   res.json({
     rtsp: protocol.getRtspUrl(camera),
-    mjpeg: `http://localhost:${PORT}/api/cameras/${req.params.id}/mjpeg`,
+    obsBrowser: `http://localhost:${PORT}/obs/camera/${req.params.id}`,
+    mjpeg: `http://localhost:${PORT}/api/cameras/${req.params.id}/mjpeg?quality=hd`,
+    mjpegSd: `http://localhost:${PORT}/api/cameras/${req.params.id}/mjpeg?quality=sd`,
     snapshot: `http://localhost:${PORT}/api/cameras/${req.params.id}/snapshot`
   });
 });
