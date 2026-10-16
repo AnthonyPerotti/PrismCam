@@ -1,4 +1,4 @@
-# 🎥 PrismCam
+#  PrismCam
 
 <p align="center">
   <img src="public/assets/icon.svg" alt="PrismCam Logo" width="140" height="140" />
