@@ -1,0 +1,46 @@
+# Dependências
+node_modules/
+package-lock.json.bak
+
+# Configurações locais e credenciais de câmeras
+config.json
+.env
+.env.local
+.env.*.local
+
+# Testes locais e scripts de teste
+test/
+tests/
+*.test.js
+test-*.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds e empacotamento
+dist/
+build/
+out/
+*.exe
+
+# Arquivos de IDE e SO
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Temporários e capturas de teste
+*.tmp
+*.temp
+scratch/
+test_*.jpg
+test_*.png
+*.bak

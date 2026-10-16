@@ -1,0 +1,30 @@
+{
+  "name": "prismcam",
+  "version": "1.0.0",
+  "description": "PrismCam — Controle PTZ, varredura de rede e captura de câmeras Datavideo IP e ONVIF para integração com OBS Studio",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node test/test-server.js"
+  },
+  "keywords": [
+    "ptz",
+    "datavideo",
+    "camera-ip",
+    "obs-studio",
+    "streaming",
+    "onvif",
+    "broadcast",
+    "video-production"
+  ],
+  "author": "Anthony Perotti",
+  "license": "MIT",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "node-fetch": "^2.7.0",
+    "open": "^8.4.2"
+  }
+}

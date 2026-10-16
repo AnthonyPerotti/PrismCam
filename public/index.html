@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrismCam — Controle PTZ & Captura de Câmeras IP</title>
+  <meta name="description" content="PrismCam - Software de controle PTZ e captura de imagem para câmeras Datavideo IP. Integração com OBS Studio.">
+  <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 40 40" width="40" height="40">
+          <defs>
+            <linearGradient id="prismGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#c850c0;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ffcb57;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <polygon points="20,2 38,35 2,35" fill="none" stroke="url(#prismGrad)" stroke-width="2.5"/>
+          <circle cx="20" cy="22" r="7" fill="none" stroke="url(#prismGrad)" stroke-width="1.5"/>
+          <circle cx="20" cy="22" r="3" fill="url(#prismGrad)" opacity="0.6"/>
+        </svg>
+        <div class="logo-text">
+          <h1>PrismCam</h1>
+          <span class="version">v1.0.0</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-panel="cameras" id="nav-cameras">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Câmeras</span>
+      </button>
+      <button class="nav-btn" data-panel="control" id="nav-control">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="12,8 16,14 8,14"/>
+        </svg>
+        <span>Controle PTZ</span>
+      </button>
+      <button class="nav-btn" data-panel="scan" id="nav-scan">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a10 10 0 0110 10"/>
+          <path d="M12 6a6 6 0 016 6"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+        <span>Varredura</span>
+      </button>
+      <button class="nav-btn" data-panel="obs" id="nav-obs">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+        <span>Integração OBS</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="server-status">
+        <span class="status-dot online"></span>
+        <span>Servidor ativo</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+    <!-- ========== PAINEL: CÂMERAS ========== -->
+    <section class="panel active" id="panel-cameras">
+      <div class="panel-header">
+        <div>
+          <h2>Câmeras</h2>
+          <p class="subtitle">Gerencie suas câmeras conectadas</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-camera" onclick="openAddCameraModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Adicionar Câmera
+        </button>
+      </div>
+
+      <div class="camera-grid" id="camera-grid">
+        <!-- Câmeras serão renderizadas aqui via JS -->
+        <div class="empty-state" id="empty-cameras">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <h3>Nenhuma câmera configurada</h3>
+          <p>Adicione uma câmera manualmente ou use a varredura de rede</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAINEL: CONTROLE PTZ ========== -->
+    <section class="panel" id="panel-control">
+      <div class="panel-header">
+        <div>
+          <h2>Controle PTZ</h2>
+          <p class="subtitle">Controle Pan, Tilt, Zoom e Foco da câmera selecionada</p>
+        </div>
+        <select class="select-camera" id="select-camera-control">
+          <option value="">Selecione uma câmera</option>
+        </select>
+      </div>
+
+      <div class="ptz-layout">
+        <!-- Preview da câmera -->
+        <div class="preview-container">
+          <div class="preview-wrapper" id="preview-wrapper">
+            <div class="preview-placeholder" id="preview-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <p>Selecione uma câmera para ver o preview</p>
+            </div>
+            <video id="preview-video" class="preview-video hidden" autoplay muted playsinline></video>
+            <img id="preview-image" class="preview-image hidden" alt="Preview da câmera"/>
+            <div class="live-stream-badge hidden" id="preview-live-badge">
+              <span class="live-dot"></span> AO VIVO
+            </div>
+          </div>
+          <div class="preview-controls">
+            <button class="btn btn-sm btn-ghost" onclick="refreshPreview()" title="Atualizar preview">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.3"/>
+              </svg>
+            </button>
+            <button class="btn btn-sm btn-ghost" onclick="toggleLivePreview()" id="btn-live-preview" title="Preview ao vivo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/>
+              </svg>
+              <span>Live</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles PTZ -->
+        <div class="controls-container">
+          <!-- D-Pad Pan/Tilt -->
+          <div class="control-group">
+            <h3 class="control-title">Pan / Tilt</h3>
+            <div class="dpad">
+              <button class="dpad-btn dpad-upleft" onmousedown="ptzMove('upleft')" onmouseup="ptzStop()" ontouchstart="ptzMove('upleft')" ontouchend="ptzStop()">↖</button>
+              <button class="dpad-btn dpad-up" onmousedown="ptzMove('up')" onmouseup="ptzStop()" ontouchstart="ptzMove('up')" ontouchend="ptzStop()">↑</button>
+              <button class="dpad-btn dpad-upright" onmousedown="ptzMove('upright')" onmouseup="ptzStop()" ontouchstart="ptzMove('upright')" ontouchend="ptzStop()">↗</button>
+              <button class="dpad-btn dpad-left" onmousedown="ptzMove('left')" onmouseup="ptzStop()" ontouchstart="ptzMove('left')" ontouchend="ptzStop()">←</button>
+              <button class="dpad-btn dpad-center" id="btn-ptz-home" onclick="ptzHome()" title="Home (Atalho: H)">⌂</button>
+              <button class="dpad-btn dpad-right" onmousedown="ptzMove('right')" onmouseup="ptzStop()" ontouchstart="ptzMove('right')" ontouchend="ptzStop()">→</button>
+              <button class="dpad-btn dpad-downleft" onmousedown="ptzMove('downleft')" onmouseup="ptzStop()" ontouchstart="ptzMove('downleft')" ontouchend="ptzStop()">↙</button>
+              <button class="dpad-btn dpad-down" onmousedown="ptzMove('down')" onmouseup="ptzStop()" ontouchstart="ptzMove('down')" ontouchend="ptzStop()">↓</button>
+              <button class="dpad-btn dpad-downright" onmousedown="ptzMove('downright')" onmouseup="ptzStop()" ontouchstart="ptzMove('downright')" ontouchend="ptzStop()">↘</button>
+            </div>
+            <div class="speed-controls">
+              <label>Velocidade Pan: <span id="pan-speed-val">12</span></label>
+              <input type="range" id="pan-speed" min="1" max="24" value="12" oninput="document.getElementById('pan-speed-val').textContent=this.value">
+              <label>Velocidade Tilt: <span id="tilt-speed-val">10</span></label>
+              <input type="range" id="tilt-speed" min="1" max="20" value="10" oninput="document.getElementById('tilt-speed-val').textContent=this.value">
+            </div>
+          </div>
+
+          <!-- Zoom -->
+          <div class="control-group">
+            <h3 class="control-title">Zoom</h3>
+            <div class="zoom-controls">
+              <button class="btn btn-control zoom-out" onmousedown="ptzZoom('zoomout')" onmouseup="ptzZoomStop()" ontouchstart="ptzZoom('zoomout')" ontouchend="ptzZoomStop()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </button>
+              <div class="zoom-label">ZOOM</div>
+              <button class="btn btn-control zoom-in" onmousedown="ptzZoom('zoomin')" onmouseup="ptzZoomStop()" ontouchstart="ptzZoom('zoomin')" ontouchend="ptzZoomStop()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </button>
+            </div>
+            <div class="speed-controls">
+              <label>Velocidade Zoom: <span id="zoom-speed-val">4</span></label>
+              <input type="range" id="zoom-speed" min="0" max="7" value="4" oninput="document.getElementById('zoom-speed-val').textContent=this.value">
+            </div>
+          </div>
+
+          <!-- Foco -->
+          <div class="control-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h3 class="control-title" style="margin-bottom:0;">Foco</h3>
+              <span class="cam-type-badge datavideo" id="focus-mode-badge" style="font-size:0.7rem; padding:2px 8px;">Auto</span>
+            </div>
+            <div class="focus-controls">
+              <button class="btn btn-control" id="btn-focus-minus" onmousedown="ptzFocus('focusnear')" onmouseup="ptzFocusStop()" ontouchstart="ptzFocus('focusnear')" ontouchend="ptzFocusStop()" title="Ajuste manual: Foco -">
+                <strong>&minus;</strong> Foco &minus;
+              </button>
+              <button class="btn btn-control btn-auto-focus active" id="btn-focus-auto" onclick="ptzFocus('autofocus')" title="Foco Automático">
+                Auto
+              </button>
+              <button class="btn btn-control" id="btn-focus-plus" onmousedown="ptzFocus('focusfar')" onmouseup="ptzFocusStop()" ontouchstart="ptzFocus('focusfar')" ontouchend="ptzFocusStop()" title="Ajuste manual: Foco +">
+                <strong>&#43;</strong> Foco &#43;
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets -->
+          <div class="control-group">
+            <h3 class="control-title">Presets</h3>
+            <div class="preset-grid">
+              <button class="btn btn-preset" id="btn-preset-1" onclick="ptzGotoPreset(1)" title="Preset 1 (Atalho: 1)">1</button>
+              <button class="btn btn-preset" id="btn-preset-2" onclick="ptzGotoPreset(2)" title="Preset 2 (Atalho: 2)">2</button>
+              <button class="btn btn-preset" id="btn-preset-3" onclick="ptzGotoPreset(3)" title="Preset 3 (Atalho: 3)">3</button>
+              <button class="btn btn-preset" id="btn-preset-4" onclick="ptzGotoPreset(4)" title="Preset 4 (Atalho: 4)">4</button>
+              <button class="btn btn-preset" id="btn-preset-5" onclick="ptzGotoPreset(5)" title="Preset 5 (Atalho: 5)">5</button>
+              <button class="btn btn-preset" id="btn-preset-6" onclick="ptzGotoPreset(6)" title="Preset 6 (Atalho: 6)">6</button>
+              <button class="btn btn-preset" id="btn-preset-7" onclick="ptzGotoPreset(7)" title="Preset 7 (Atalho: 7)">7</button>
+              <button class="btn btn-preset" id="btn-preset-8" onclick="ptzGotoPreset(8)" title="Preset 8 (Atalho: 8)">8</button>
+              <button class="btn btn-preset" id="btn-preset-9" onclick="ptzGotoPreset(9)" title="Preset 9 (Atalho: 9)">9</button>
+            </div>
+            <div class="preset-save">
+              <input type="number" id="preset-number" min="1" max="255" value="1" placeholder="Nº">
+              <button class="btn btn-sm btn-secondary" onclick="ptzSetPreset()">Salvar Preset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log de comandos -->
+      <div class="command-log">
+        <h3 class="control-title">Log de Comandos</h3>
+        <div class="log-entries" id="log-entries">
+          <div class="log-entry log-info">Sistema iniciado. Selecione uma câmera para começar.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAINEL: VARREDURA DE REDE ========== -->
+    <section class="panel" id="panel-scan">
+      <div class="panel-header">
+        <div>
+          <h2>Varredura de Rede</h2>
+          <p class="subtitle">Encontre câmeras Datavideo automaticamente na sua rede</p>
+        </div>
+      </div>
+
+      <div class="scan-config">
+        <div class="scan-form">
+          <div class="form-group">
+            <label for="scan-subnet">Subnet</label>
+            <input type="text" id="scan-subnet" placeholder="Ex: 192.168.1" class="input">
+            <small>Deixe vazio para detectar automaticamente</small>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="scan-start">IP Início</label>
+              <input type="number" id="scan-start" value="1" min="1" max="254" class="input">
+            </div>
+            <div class="form-group">
+              <label for="scan-end">IP Fim</label>
+              <input type="number" id="scan-end" value="254" min="1" max="254" class="input">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-scan" id="btn-start-scan" onclick="startNetworkScan()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/>
+            </svg>
+            Iniciar Varredura
+          </button>
+        </div>
+
+        <!-- Progresso -->
+        <div class="scan-progress hidden" id="scan-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-text" id="progress-text">0%</div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="scan-results" id="scan-results">
+          <!-- Resultados serão inseridos via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAINEL: INTEGRAÇÃO OBS ========== -->
+    <section class="panel" id="panel-obs">
+      <div class="panel-header">
+        <div>
+          <h2>Integração com OBS</h2>
+          <p class="subtitle">URLs e endpoints para usar no OBS Studio</p>
+        </div>
+      </div>
+
+      <div class="obs-info">
+        <div class="info-card">
+          <div class="info-card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+            <h3>Captura de Vídeo</h3>
+          </div>
+          <div class="info-card-body">
+            <p>Use uma das opções abaixo para capturar o vídeo da câmera no OBS:</p>
+            
+            <div class="url-block">
+              <span class="url-label">MJPEG Stream (Browser Source)</span>
+              <div class="url-copy" id="obs-mjpeg-urls">
+                <p class="muted">Adicione câmeras para ver as URLs aqui</p>
+              </div>
+            </div>
+
+            <div class="url-block">
+              <span class="url-label">RTSP Stream (Media Source / VLC)</span>
+              <div class="url-copy" id="obs-rtsp-urls">
+                <p class="muted">Adicione câmeras para ver as URLs aqui</p>
+              </div>
+            </div>
+
+            <div class="url-block">
+              <span class="url-label">Snapshot (Imagem estática)</span>
+              <div class="url-copy" id="obs-snapshot-urls">
+                <p class="muted">Adicione câmeras para ver as URLs aqui</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+            <h3>Controle PTZ via API</h3>
+          </div>
+          <div class="info-card-body">
+            <p>Use estes endpoints em scripts/hotkeys do OBS para controlar o PTZ:</p>
+            
+            <div class="api-reference">
+              <div class="api-item">
+                <code class="method">POST</code>
+                <code class="endpoint">/api/ptz/{id}/move</code>
+                <span class="api-desc">Mover câmera</span>
+              </div>
+              <div class="api-item">
+                <code class="method">POST</code>
+                <code class="endpoint">/api/ptz/{id}/stop</code>
+                <span class="api-desc">Parar movimento</span>
+              </div>
+              <div class="api-item">
+                <code class="method">POST</code>
+                <code class="endpoint">/api/ptz/{id}/zoom</code>
+                <span class="api-desc">Controlar zoom</span>
+              </div>
+              <div class="api-item">
+                <code class="method">POST</code>
+                <code class="endpoint">/api/ptz/{id}/preset/goto</code>
+                <span class="api-desc">Ir para preset</span>
+              </div>
+            </div>
+
+            <div class="api-example">
+              <span class="url-label">Exemplo com curl:</span>
+              <pre><code>curl -X POST http://localhost:4000/api/ptz/{camera-id}/preset/goto \
+  -H "Content-Type: application/json" \
+  -d '{"preset": 1}'</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== MODAL: ADICIONAR CÂMERA ========== -->
+  <div class="modal-overlay hidden" id="modal-add-camera">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Adicionar Câmera</h3>
+        <button class="btn-close" onclick="closeAddCameraModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cam-name">Nome</label>
+          <input type="text" id="cam-name" placeholder="Ex: Câmera Palco 1" class="input">
+        </div>
+        <div class="form-group">
+          <label for="cam-ip">Endereço IP <span class="required">*</span></label>
+          <input type="text" id="cam-ip" placeholder="Ex: 192.168.1.100" class="input" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cam-user">Usuário</label>
+            <input type="text" id="cam-user" value="admin" class="input">
+          </div>
+          <div class="form-group">
+            <label for="cam-pass">Senha</label>
+            <input type="password" id="cam-pass" value="admin" class="input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cam-type">Tipo de Câmera</label>
+          <select id="cam-type" class="input">
+            <option value="datavideo">Datavideo PTZ</option>
+            <option value="generic-onvif">Câmera IP Genérica (ONVIF)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeAddCameraModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="addCamera()" id="btn-save-camera">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: CONFIRMAR REMOÇÃO ========== -->
+  <div class="modal-overlay hidden" id="modal-delete-camera">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Remover Câmera</h3>
+        <button class="btn-close" onclick="closeDeleteCameraModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-camera-msg">Tem certeza que deseja remover esta câmera?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeDeleteCameraModal()">Cancelar</button>
+        <button class="btn btn-danger" id="btn-confirm-delete" onclick="confirmDeleteCamera()">Sim, Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/js/wfs.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
