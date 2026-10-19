@@ -127,10 +127,7 @@ echo Dica: Se o Firewall do Windows exibir um aviso, clique em "Permitir Acesso"
 echo       para habilitar a descoberta de cameras na rede local.
 echo.
 
-:: Abre o navegador padrao em background
-start "" http://localhost:4000
-
-:: Inicia o servidor Node.js
+:: Inicia o servidor Node.js (ele abre o navegador automaticamente assim que estiver pronto)
 node src/server.js
 
 if %errorlevel% neq 0 (
