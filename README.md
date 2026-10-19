@@ -65,12 +65,18 @@ Principais objetivos:
 ### Pré-requisitos
 - [Node.js](https://nodejs.org/) versão 18 ou superior instalado.
 
-### Modo Rápido (Windows)
-Execute com duplo clique no arquivo:
-```cmd
-start.bat
-```
-O inicializador verifica e instala dependências automaticamente na primeira execução e abre o navegador em `http://localhost:4000`.
+### Modo Rápido (Windows — 100% Automático)
+
+Em qualquer computador com Windows (mesmo em PCs de estúdio ou transmissão que nunca tiveram ferramentas de código instaladas):
+
+1. Dê um duplo clique no arquivo:
+   ```cmd
+   start.bat
+   ```
+2. O script detecta automaticamente se o Node.js já existe no sistema:
+   - Se não existir, baixa e configura uma versão oficial portátil (Node.js LTS) na pasta local do projeto sem precisar de privilégios de administrador.
+   - Instala as dependências e ferramentas de vídeo necessárias automaticamente.
+3. O servidor é iniciado e o navegador padrão abre diretamente no painel: `http://localhost:4000`.
 
 ### Modo Manual (Terminal)
 ```bash

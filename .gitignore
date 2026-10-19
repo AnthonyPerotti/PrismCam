@@ -1,6 +1,8 @@
 # Dependências
 node_modules/
 package-lock.json.bak
+bin/
+.bin/
 
 # Configurações locais e credenciais de câmeras
 config.json
