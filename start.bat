@@ -120,8 +120,8 @@ if not exist "node_modules" (
 :: -----------------------------------------------------------------
 echo.
 echo [INFO] Iniciando o servidor PrismCam...
-echo [INFO] Painel Web: http://localhost:4000
-echo [INFO] API REST:   http://localhost:4000/api
+echo [INFO] Painel Web: http://localhost:3737
+echo [INFO] API REST:   http://localhost:3737/api
 echo.
 echo Dica: Se o Firewall do Windows exibir um aviso, clique em "Permitir Acesso"
 echo       para habilitar a descoberta de cameras na rede local.

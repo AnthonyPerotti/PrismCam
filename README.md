@@ -76,7 +76,7 @@ Em qualquer computador com Windows (mesmo em PCs de estúdio ou transmissão que
 2. O script detecta automaticamente se o Node.js já existe no sistema:
    - Se não existir, baixa e configura uma versão oficial portátil (Node.js LTS) na pasta local do projeto sem precisar de privilégios de administrador.
    - Instala as dependências e ferramentas de vídeo necessárias automaticamente.
-3. O servidor é iniciado e o navegador padrão abre diretamente no painel: `http://localhost:4000`.
+3. O servidor é iniciado e o navegador padrão abre diretamente no painel: `http://localhost:3737`.
 
 ### Modo Manual (Terminal)
 ```bash
@@ -88,7 +88,7 @@ npm start
 
 Acesse no navegador:
 ```
-http://localhost:4000
+http://localhost:3737
 ```
 
 ---
@@ -102,12 +102,12 @@ Para evitar que o vídeo apareça com margens pretas no OBS:
 1. No OBS Studio, adicione uma nova fonte do tipo **Navegador (Browser Source)**.
 2. No campo **URL**, cole o link dedicado do PrismCam:
    ```
-   http://localhost:4000/obs/camera/<id-da-camera>
+   http://localhost:3737/obs/camera/<id-da-camera>
    ```
 3. Defina a **Largura** e **Altura** desejadas no OBS (ex: `1920` e `1080`).
 4. Este endpoint ajusta o stream em tela cheia automaticamente sem cortes ou margens pretas.
 
-> **Dica para URL MJPEG direta:** Se você usar a URL direta `http://localhost:4000/api/cameras/<id>/mjpeg?quality=hd`, configure a resolução no OBS para `1920x1080` e, no campo **CSS personalizado** do OBS, adicione:
+> **Dica para URL MJPEG direta:** Se você usar a URL direta `http://localhost:3737/api/cameras/<id>/mjpeg?quality=hd`, configure a resolução no OBS para `1920x1080` e, no campo **CSS personalizado** do OBS, adicione:
 > ```css
 > body { margin: 0; background-color: rgba(0, 0, 0, 0); overflow: hidden; }
 > img { width: 100%; height: 100%; object-fit: cover; }

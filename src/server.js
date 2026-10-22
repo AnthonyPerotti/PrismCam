@@ -7,7 +7,7 @@ const { NetworkScanner } = require('./network-scanner');
 const StreamManager = require('./stream-manager');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3737;
 
 // Middleware
 app.use(cors());
